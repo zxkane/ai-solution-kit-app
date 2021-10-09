@@ -28,7 +28,7 @@ def detect_running_region():
 
     # else query an external service
     # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-identity-documents.html
-    r = requests.get("http://169.254.169.254/latest/dynamic/instance-identity/document")
+    r = requests.get("http://169.254.169.254/latest/dynamic/instance-identity/document", timeout=(3, 5))
     response_json = r.json()
     return response_json.get('region')
 
@@ -41,12 +41,13 @@ def make_signed_request(input_img):
     with open(input_img, 'rb') as image_file:
         payload = {
             'img': base64.b64encode(image_file.read()).decode('utf-8'),
-            'scale': '2',
+            'scale': '4',
         }
         headers = {
            'Content-Type': 'application/json'
         }
-        response = requests.request("POST", endpoint, headers=headers, json=payload, auth=auth)
+        response = requests.request("POST", endpoint, headers=headers, json=payload, auth=auth,
+            timeout=(5, 300))
         
         original_name = os.path.basename(input_img).split('.')[0]
         if response.status_code >= 200 and response.status_code < 300:
