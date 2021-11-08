@@ -39,7 +39,7 @@ def make_signed_request(input_img):
                            aws_service='execute-api')
 
     with open(input_img, 'rb') as image_file:
-        scale = '2'
+        scale = '4'
         payload = {
             'img': base64.b64encode(image_file.read()).decode('utf-8'),
             'scale': scale,
@@ -52,8 +52,12 @@ def make_signed_request(input_img):
         
         original_name = os.path.basename(input_img).split('.')[0]
         if response.status_code >= 200 and response.status_code < 300:
-            im = Image.open(BytesIO(base64.b64decode(response.json()['result'])))
-            im.save(f'{original_name}_x{scale}.png', 'PNG')
+            msg = response.json()
+            if 'result' not in msg:
+                print(msg)
+            else:
+                im = Image.open(BytesIO(base64.b64decode(msg['result'])))
+                im.save(f'{original_name}_x{scale}.png', 'PNG')
         else:
             print(f'Response status is {response.status_code}, and message is {response.text}')
 
